@@ -1,23 +1,12 @@
 # cardlink-go
 
-Go SDK for [Cardlink](https://developer.cardlink.gr/) **redirect** (HTML form POST + digest) and **VPOS XML 2.1** (HTTP XML + Canonical XML 1.0 digest), with sandbox/production endpoints for Cardlink, Nexi, and Worldline.
+Go SDK for [Cardlink](https://developer.cardlink.gr/) **VPOS XML 2.1** (HTTP XML + Canonical XML 1.0 digest), with sandbox/production endpoints for Cardlink, Nexi, and Worldline.
 
 ## Install
 
 ```bash
 go get github.com/yiannis54/cardlink-go@latest
 ```
-
-## Redirect payments
-
-1. Configure [`cardlink.Config`](cardlink/config.go) with `MID`, `SharedSecret`, `Environment` (`Sandbox` / `Production`), and `BusinessPartner` (`Cardlink`, `Nexi`, `Worldline`).
-2. Build a [`redirect.PaymentRequest`](redirect/payment.go), then [`redirect.Signer.Sign`](redirect/signer.go) to obtain POST fields including `digest` (server-side only).
-3. POST the browser to `cfg.RedirectURL()` (path `/vpos/shophandlermpi`), or render [`redirect.FormHTML`](redirect/html.go).
-4. On return to `confirmUrl` / `cancelUrl`, call [`Signer.VerifyResponse`](redirect/verify.go). Use [`IsServerToServerCallback`](redirect/callback.go) to detect delayed `Modirum VPOS` background posts. Cardlink may retry server-to-server posts: respond with **200** for recognized orders, **406** if unknown, **400** for malformed input (per gateway documentation); implement idempotency on `orderid`.
-
-**Subscriptions (master):** set `ExtRecurringFrequency`, `ExtRecurringEndDate` on `PaymentRequest`. For **unscheduled** recurring, set `Var6` to `rcauto=false` per Cardlink docs. **Installments** use `ExtInstallmentOffset` / `ExtInstallmentPeriod` — not combinable with recurring.
-
-**IRIS (redirect):** set `PayMethod` to `IRIS` where supported. **IRIS QR** generation for display uses VPOS XML — see below.
 
 ## VPOS XML 2.1
 
@@ -30,10 +19,11 @@ Supported operations:
 - [`Client.Refund`](vposxml/refund_cancel.go) / [`Client.Cancel`](vposxml/refund_cancel.go)
 - [`Client.IRISSale`](vposxml/iris.go) (`PayMethod=iris`, `PaymentOption=irisQr`)
 - [`Client.RecurringOperation`](vposxml/recurring.go) (`RecurringChild`, `Cancel`)
+- [`Client.PaymentLink`](vposxml/paymentlink.go) (create and optionally email a payment link)
 
 Digest verification uses **inclusive Canonical XML 1.0** on the `<Message>` element and `Base64(SHA256(c14n || sharedSecret))` (see Cardlink direct integration docs).
 
-**Out of scope for this module:** VPOS XML 4.1 (XML-DSig), redirect tokenization tables, 3DS/MPI direct card entry, Payment Link XML, CSE, mass files.
+**Out of scope for this module:** VPOS XML 4.1 (XML-DSig) and other direct-integration features not implemented (e.g. tokenizer/token tables, 3DS/MPI direct card entry, CSE, mass files).
 
 ### Quick start: IRIS payment
 
@@ -74,6 +64,50 @@ func main() {
 }
 ```
 
+### Quick start: Payment Link
+
+Use [`Client.PaymentLink`](vposxml/paymentlink.go) to create a payment link and optionally have the gateway email it to the payer. Supports installments and billing address.
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/yiannis54/cardlink-go/cardlink"
+	"github.com/yiannis54/cardlink-go/vposxml"
+)
+
+func main() {
+	cfg := cardlink.Config{
+		MID:          "your-mid",
+		SharedSecret: "your-shared-secret",
+		Environment:  cardlink.Sandbox,
+		Partner:      cardlink.Worldline,
+	}
+	client := vposxml.NewClient(cfg)
+
+	mailLink := true
+	resp, err := client.PaymentLink(context.Background(), vposxml.PaymentLinkParams{
+		OrderID:             "order-002",
+		OrderAmount:         "25.00",
+		Currency:            "EUR",
+		PayerEmail:          "customer@example.com",
+		TxType:              vposxml.PaymentLinkTxPayment,
+		LinkValidityDays:    5,
+		MailLinkIfValidMail: &mailLink,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("status:", resp.Status)
+	fmt.Println("link:", resp.PaymentLink)
+	fmt.Println("mailed:", resp.LinkMailed)
+}
+```
+
 ## Endpoints
 
 Sandbox hosts (examples):
@@ -82,21 +116,20 @@ Sandbox hosts (examples):
 - Nexi: `https://alphaecommerce-test.cardlink.gr`
 - Worldline: `https://eurocommerce-test.cardlink.gr`
 
-Production hosts omit `-test` where applicable — see [`cardlink/config.go`](cardlink/config.go). Override with `RedirectBaseURL` / `VPOSXMLBaseURL` if needed.
+Production hosts omit `-test` where applicable — see [`cardlink/config.go`](cardlink/config.go). Override with `VPOSXMLBaseURL` if needed.
 
 ## Examples
 
 See [`examples/`](examples/):
 
-- `examples/redirect` — sign a payment and print hidden fields
 - `examples/vposxml` — build a capture request (no network unless credentials set)
-- `examples/webhook` — handle Cardlink confirmUrl
+- `examples/webhook` — verify VPOS XML callbacks/notifications
 
 ## Documentation
 
-- [Redirect integration](https://developer.cardlink.gr/api_products_categories/redirect-integration/)
 - [Recurring transactions](https://developer.cardlink.gr/documentation_categories/recurring-transactions/)
 - [VPOS XML sample requests](https://developer.cardlink.gr/api_products_categories/vpos-xml-requests/)
+- [Payment Link through XML API](https://developer.cardlink.gr/api_products_categories/payment-link/)
 
 ## License
 

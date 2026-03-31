@@ -16,17 +16,17 @@ import (
 
 // Client performs VPOS XML 2.1 requests over HTTPS.
 type Client struct {
-	cfg    cardlink.Config
-	client *http.Client
+	cfg        cardlink.Config
+	httpClient *http.Client
 }
 
 // NewClient returns a client using cfg for endpoint resolution and digest signing.
-func NewClient(cfg cardlink.Config) *Client {
-	hc := cfg.HTTPClient
-	if hc == nil {
-		hc = &http.Client{Timeout: 30 * time.Second}
+func NewClient(cfg cardlink.Config, opts ...Option) *Client {
+	c := &Client{cfg: cfg, httpClient: &http.Client{Timeout: 30 * time.Second}}
+	for _, opt := range opts {
+		opt(c)
 	}
-	return &Client{cfg: cfg, client: hc}
+	return c
 }
 
 func (c *Client) postXML(ctx context.Context, body string) ([]byte, error) {
@@ -39,7 +39,7 @@ func (c *Client) postXML(ctx context.Context, body string) ([]byte, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/xml")
-	resp, err := c.client.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

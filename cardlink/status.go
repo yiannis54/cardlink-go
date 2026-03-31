@@ -1,6 +1,6 @@
 package cardlink
 
-// Status is a payment or transaction status from redirect or XML responses.
+// Status is a payment or transaction status from gateway responses.
 type Status string
 
 const (

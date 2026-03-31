@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/yiannis54/cardlink-go/cardlink"
-	"github.com/yiannis54/cardlink-go/redirect"
+	"github.com/yiannis54/cardlink-go/vposxml"
 )
 
 func main() {
@@ -17,20 +17,14 @@ func main() {
 		Environment:  cardlink.Sandbox,
 		Partner:      cardlink.Cardlink,
 	}
-	signer := redirect.NewSigner(cfg)
+	client := vposxml.NewClient(cfg)
 
 	http.HandleFunc("/pay/confirm", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "bad request", http.StatusBadRequest)
-			return
-		}
-		v := r.Form
-
-		resp, err := signer.VerifyResponse(v)
+		resp, err := client.VerifyWebhookRequest(r)
 		if err != nil {
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
@@ -39,11 +33,7 @@ func main() {
 		// Idempotent fulfillment keyed by resp.OrderID (and handle unknown order → 406).
 		_ = resp
 
-		if redirect.IsServerToServerCallback(r) {
-			log.Println("background Modirum VPOS notification")
-		} else {
-			log.Println("browser return to confirmUrl")
-		}
+		log.Printf("vposxml callback: order=%s status=%s", resp.OrderID, resp.Status)
 
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "OK")

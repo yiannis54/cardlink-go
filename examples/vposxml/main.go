@@ -16,5 +16,5 @@ func main() {
 		Partner:      cardlink.Cardlink,
 	}
 	_ = vposxml.NewClient(cfg)
-	fmt.Println("Configure MID and SharedSecret, then use vposxml.Client.Capture / Status / IRISSale / RecurringOperation.")
+	fmt.Println("Configure MID and SharedSecret, then use vposxml.Client.Capture / Status / IRISSale / RecurringOperation / PaymentLink.")
 }

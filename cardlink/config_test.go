@@ -5,20 +5,6 @@ import (
 	"testing"
 )
 
-func TestConfig_RedirectURL(t *testing.T) {
-	cfg := Config{Environment: Sandbox, Partner: Worldline}
-	u, err := cfg.RedirectURL()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !strings.HasSuffix(u.Path, "/vpos/shophandlermpi") {
-		t.Fatalf("path: %s", u.Path)
-	}
-	if !strings.Contains(u.Host, "eurocommerce-test") {
-		t.Fatalf("host: %s", u.Host)
-	}
-}
-
 func TestConfig_VPOSXMLURL(t *testing.T) {
 	cfg := Config{Environment: Production, Partner: Cardlink}
 	u, err := cfg.VPOSXMLURL()
@@ -31,16 +17,31 @@ func TestConfig_VPOSXMLURL(t *testing.T) {
 }
 
 func TestConfig_OverrideBase(t *testing.T) {
-	cfg := Config{
-		Environment:     Sandbox,
-		Partner:         Cardlink,
-		RedirectBaseURL: "https://custom.example",
-	}
-	u, err := cfg.RedirectURL()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if u.Scheme != "https" || u.Host != "custom.example" {
-		t.Fatalf("got %s", u.String())
-	}
+	t.Run("should return sandbox host", func(t *testing.T) {
+		cfg := Config{
+			Environment: Sandbox,
+			Partner:     Cardlink,
+		}
+		u, err := cfg.VPOSXMLURL()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if u.Scheme != "https" || u.Host != "ecommerce-test.cardlink.gr" {
+			t.Fatalf("got %s", u.String())
+		}
+	})
+
+	t.Run("should return worldline production host", func(t *testing.T) {
+		cfg := Config{
+			Environment: Production,
+			Partner:     Worldline,
+		}
+		u, err := cfg.VPOSXMLURL()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if u.Scheme != "https" || u.Host != "eurocommerce.cardlink.gr" {
+			t.Fatalf("got %s", u.String())
+		}
+	})
 }

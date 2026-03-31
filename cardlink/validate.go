@@ -8,7 +8,7 @@ import (
 
 var orderIDRe = regexp.MustCompile(`^[A-Za-z0-9]+$`)
 
-// ValidateOrderID checks order id per redirect rules: alphanumeric, max 50 (45 if recurring).
+// ValidateOrderID checks Cardlink order id rules: alphanumeric, max 50 (45 if recurring).
 func ValidateOrderID(id string, recurring bool) error {
 	max := 50
 	if recurring {
