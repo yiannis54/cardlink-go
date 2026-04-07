@@ -123,9 +123,15 @@ func (c *Client) buildRecurringMessage(p RecurringOperationParams) (*etree.Eleme
 	if p.ChildOrderAmount != "" || p.ChildCurrency != "" {
 		oi := rr.CreateElement("OrderInfo")
 		oi.CreateElement("OrderId").SetText(p.OrderID)
-		oi.CreateElement("OrderDesc").SetText(p.ChildOrderDesc)
-		oi.CreateElement("OrderAmount").SetText(p.ChildOrderAmount)
-		oi.CreateElement("Currency").SetText(p.ChildCurrency)
+		if p.ChildOrderDesc != "" {
+			oi.CreateElement("OrderDesc").SetText(p.ChildOrderDesc)
+		}
+		if p.ChildOrderAmount != "" {
+			oi.CreateElement("OrderAmount").SetText(p.ChildOrderAmount)
+		}
+		if p.ChildCurrency != "" {
+			oi.CreateElement("Currency").SetText(p.ChildCurrency)
+		}
 	}
 	return m, nil
 }

@@ -15,6 +15,8 @@ type RefundParams struct {
 	OrderID     string
 	OrderAmount string
 	Currency    string
+	Var1        string
+	Var2        string
 }
 
 // RefundResponse is a parsed RefundResponse.
@@ -67,6 +69,12 @@ func (c *Client) buildRefundMessage(p RefundParams) (*etree.Element, error) {
 	oi.CreateElement("OrderId").SetText(p.OrderID)
 	oi.CreateElement("OrderAmount").SetText(p.OrderAmount)
 	oi.CreateElement("Currency").SetText(p.Currency)
+	if p.Var1 != "" {
+		oi.CreateElement("Var1").SetText(p.Var1)
+	}
+	if p.Var2 != "" {
+		oi.CreateElement("Var2").SetText(p.Var2)
+	}
 	return m, nil
 }
 
@@ -112,6 +120,8 @@ type CancelParams struct {
 	OrderID     string
 	OrderAmount string
 	Currency    string
+	Var1        string
+	Var2        string
 }
 
 // CancelResponse is a parsed CancelResponse.
@@ -165,6 +175,12 @@ func (c *Client) buildCancelMessage(p CancelParams) (*etree.Element, error) {
 	oi.CreateElement("OrderId").SetText(p.OrderID)
 	oi.CreateElement("OrderAmount").SetText(p.OrderAmount)
 	oi.CreateElement("Currency").SetText(p.Currency)
+	if p.Var1 != "" {
+		oi.CreateElement("Var1").SetText(p.Var1)
+	}
+	if p.Var2 != "" {
+		oi.CreateElement("Var2").SetText(p.Var2)
+	}
 	return m, nil
 }
 

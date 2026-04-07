@@ -17,6 +17,8 @@ type IRISSaleParams struct {
 	OrderDesc   string
 	OrderAmount string
 	Currency    string
+	Var1        string
+	Var2        string
 }
 
 // IRISSaleResponse is a parsed SaleResponse for IRIS.
@@ -72,6 +74,12 @@ func (c *Client) buildIRISSaleMessage(p IRISSaleParams) (*etree.Element, error) 
 	oi.CreateElement("OrderDesc").SetText(p.OrderDesc)
 	oi.CreateElement("OrderAmount").SetText(p.OrderAmount)
 	oi.CreateElement("Currency").SetText(p.Currency)
+	if p.Var1 != "" {
+		oi.CreateElement("Var1").SetText(p.Var1)
+	}
+	if p.Var2 != "" {
+		oi.CreateElement("Var2").SetText(p.Var2)
+	}
 	pi := sr.CreateElement("PaymentInfo")
 	pi.CreateElement("PayMethod").SetText("iris")
 	pi.CreateElement("PaymentOption").SetText("irisQr")

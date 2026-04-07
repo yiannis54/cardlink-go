@@ -13,6 +13,8 @@ type StatusParams struct {
 	TimeStamp string
 	MID       string
 	OrderID   string
+	Var1      string
+	Var2      string
 }
 
 // StatusResponse is a parsed StatusResponse.
@@ -51,6 +53,12 @@ func (c *Client) buildStatusMessage(p StatusParams) (*etree.Element, error) {
 	sr.CreateElement("Authentication").CreateElement("Mid").SetText(mid)
 	ti := sr.CreateElement("TransactionInfo")
 	ti.CreateElement("OrderId").SetText(p.OrderID)
+	if p.Var1 != "" {
+		ti.CreateElement("Var1").SetText(p.Var1)
+	}
+	if p.Var2 != "" {
+		ti.CreateElement("Var2").SetText(p.Var2)
+	}
 	return m, nil
 }
 

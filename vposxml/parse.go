@@ -84,3 +84,17 @@ func firstText(el *etree.Element, names ...string) string {
 	}
 	return ""
 }
+
+// varText looks for a free variable first as a direct child element (e.g. <Var1>),
+// then as an <Attribute name="VAR1"> element (the format used in StatusResponse and webhooks).
+func varText(el *etree.Element, elemName, attrName string) string {
+	if v := textOrEmpty(el, "./"+elemName); v != "" {
+		return v
+	}
+	for _, child := range el.ChildElements() {
+		if child.Tag == "Attribute" && child.SelectAttrValue("name", "") == attrName {
+			return strings.TrimSpace(child.Text())
+		}
+	}
+	return ""
+}

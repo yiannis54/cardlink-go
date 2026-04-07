@@ -36,7 +36,7 @@ func main() {
 		log.Printf("vposxml callback: order=%s status=%s", resp.OrderID, resp.Status)
 
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "OK")
+		_, _ = fmt.Fprint(w, "OK")
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

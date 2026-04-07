@@ -15,6 +15,8 @@ type CaptureParams struct {
 	OrderID     string
 	OrderAmount string
 	Currency    string
+	Var1        string
+	Var2        string
 }
 
 // CaptureResponse is parsed CaptureResponse.
@@ -55,6 +57,12 @@ func (c *Client) buildCaptureMessage(p CaptureParams) (*etree.Element, error) {
 	oi.CreateElement("OrderId").SetText(p.OrderID)
 	oi.CreateElement("OrderAmount").SetText(p.OrderAmount)
 	oi.CreateElement("Currency").SetText(p.Currency)
+	if p.Var1 != "" {
+		oi.CreateElement("Var1").SetText(p.Var1)
+	}
+	if p.Var2 != "" {
+		oi.CreateElement("Var2").SetText(p.Var2)
+	}
 	return m, nil
 }
 

@@ -54,6 +54,7 @@ type PaymentLinkParams struct {
 	PayMethod     string
 	PaymentOption string
 
+	// extra params are only sent to the request, they're not returned in the response
 	Var1 string
 	Var2 string
 }
@@ -124,6 +125,12 @@ func (c *Client) buildPaymentLinkMessage(p PaymentLinkParams) (*etree.Element, e
 	oi.CreateElement("PayerEmail").SetText(p.PayerEmail)
 	if p.PayerPhone != "" {
 		oi.CreateElement("PayerPhone").SetText(p.PayerPhone)
+	}
+	if p.Var1 != "" {
+		oi.CreateElement("Var1").SetText(p.Var1)
+	}
+	if p.Var2 != "" {
+		oi.CreateElement("Var2").SetText(p.Var2)
 	}
 	if p.BillingAddress != nil {
 		ba := oi.CreateElement("BillingAddress")
