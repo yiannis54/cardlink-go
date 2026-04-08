@@ -18,3 +18,15 @@ func (e Environment) String() string {
 		return "unknown"
 	}
 }
+
+// ParseEnvironment parses a string into an Environment.
+func ParseEnvironment(s string) Environment {
+	switch s {
+	case "sandbox":
+		return Sandbox
+	case "production":
+		return Production
+	default:
+		return Sandbox
+	}
+}

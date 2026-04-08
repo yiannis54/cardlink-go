@@ -1,4 +1,3 @@
-// Command vposxml demonstrates building a VPOS XML capture request body (no HTTP by default).
 package main
 
 import (
@@ -16,5 +15,5 @@ func main() {
 		Partner:      cardlink.Cardlink,
 	}
 	_ = vposxml.NewClient(cfg)
-	fmt.Println("Configure MID and SharedSecret, then use vposxml.Client.Capture / Status / IRISSale / RecurringOperation / PaymentLink.")
+	fmt.Println("Configure MID and SharedSecret, then use vposxml.ClientAPI in app code and vposxml.MockClientAPI in tests.")
 }
