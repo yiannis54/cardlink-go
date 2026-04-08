@@ -20,6 +20,13 @@ Supported operations:
 - [`Client.IRISSale`](vposxml/iris.go) (`PayMethod=iris`, `PaymentOption=irisQr`)
 - [`Client.RecurringOperation`](vposxml/recurring.go) (`RecurringChild`, `Cancel`)
 - [`Client.PaymentLink`](vposxml/paymentlink.go) (create and optionally email a payment link)
+- [`Client.VerifyWebhook`](vposxml/webhook.go) / [`Client.VerifyWebhookRequest`](vposxml/webhook.go) (validate callback digest)
+- [`Client.RawPOST`](vposxml/raw.go) (send raw VPOS XML for advanced/custom flows)
+
+### Interface-first usage (recommended)
+
+`vposxml.Client` now exposes a stable consumer-facing interface: [`vposxml.ClientAPI`](vposxml/interface.go).
+Depend on `ClientAPI` in your services so production code uses `vposxml.NewClient(cfg)` and tests can swap in [`vposxml.MockClientAPI`](vposxml/mock.go).
 
 Digest verification uses **inclusive Canonical XML 1.0** on the `<Message>` element and `Base64(SHA256(c14n || sharedSecret))` (see Cardlink direct integration docs).
 
@@ -122,7 +129,8 @@ Production hosts omit `-test` where applicable — see [`cardlink/config.go`](ca
 
 See [`examples/`](examples/):
 
-- `examples/vposxml` — build a capture request (no network unless credentials set)
+- `examples/vposxml` — initialize client config and use `vposxml.ClientAPI` in app code
+- `examples/vposxml/mock_usage_test.go` — unit test pattern using `vposxml.MockClientAPI`
 - `examples/webhook` — verify VPOS XML callbacks/notifications
 
 ## Documentation
